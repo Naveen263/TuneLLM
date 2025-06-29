@@ -4,3 +4,5 @@ bitsandbytes
 trl
 torch
 transformers
+datasets
+
