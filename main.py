@@ -8,7 +8,7 @@ from LLMModel import LLMModel
 import torch
 from peft import LoraConfig, get_peft_model
 from trl import SFTTrainer, GRPOTrainer, DPOTrainer
-from transformers import TrainingArguments
+from transformers import TrainingArguments, BitsAndBytesConfig
 import gc
 from dataset_converter import CustomDataset
 from transformers import DataCollatorForLanguageModeling
@@ -34,20 +34,26 @@ peft_config = LoraConfig(
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
 )
 
-
+#Quantization Configuration
+quantization_config = BitsAndBytesConfig(
+    load_in_8bit=True,
+    llm_int8_enable_fp32_cpu_offload=True,
+    llm_int8_threshold=6.0
+)
 
 
 
 def train_model(model, tokenizer, dataset):
     print("Training model")
     training_args = TrainingArguments(
-        output_dir="output",
-        per_device_train_batch_size=1,
-        per_device_eval_batch_size=1,
-        gradient_accumulation_steps=2,
+        output_dir="output_8bit",
+        per_device_train_batch_size=2,
+        per_device_eval_batch_size=2,
+        gradient_accumulation_steps=4,
         optim="paged_adamw_32bit",
         num_train_epochs=1,
-        logging_steps=0.2,
+        logging_steps=100,
+        save_steps=1000,
         warmup_steps=10,
         logging_strategy="steps",
         learning_rate=2e-4,
@@ -101,7 +107,7 @@ def main():
     try:
         # Initialize model
         print(f"\n1. Initializing model: {MODEL_NAME}")
-        model = LLMModel(MODEL_NAME)
+        model = LLMModel(MODEL_NAME, quantization_config)
         
         # Show model info
         model_info = model.get_model_info()
@@ -112,9 +118,6 @@ def main():
         print(f"\n2. Loading dataset: {DATASET_NAME}")
         dataset = CustomDataset(DATASET_NAME, tokenizer=model.tokenizer, dataset_format="qwen3")        
         train_dataset = dataset.get_train_dataset() 
-        test_dataset = dataset.get_test_dataset()
-        print(f"Size of train dataset: {len(train_dataset)}")
-        print(f"Size of test dataset: {len(test_dataset)}")
 
         
 
@@ -125,13 +128,13 @@ def main():
         
         
         # Apply LoRA
-        # print(f"\n6. Applying LoRA configuration...")
-        # peft_model = get_peft_model(model.model, peft_config)  # type: ignore
-        # peft_model.print_trainable_parameters()  # type: ignore
+        print(f"\n6. Applying LoRA configuration...")
+        peft_model = get_peft_model(model.model, peft_config)  # type: ignore
+        peft_model.print_trainable_parameters()  # type: ignore
         
         # Train the model
-        # print(f"\n7. Starting training...")
-        # train_model(peft_model, model.tokenizer, train_dataset)
+        print(f"\n7. Starting training...")
+        train_model(peft_model, model.tokenizer, train_dataset)
 
 
         # benchmark_model(peft_model, model.tokenizer, train_dataset)

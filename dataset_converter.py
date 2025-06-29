@@ -13,7 +13,7 @@ class CustomDataset:
         self.dataset_name = dataset_name
         self.subset = subset
         self.train_dataset = load_dataset(self.dataset_name, self.subset, split="train", trust_remote_code=True)
-        self.test_dataset = load_dataset(self.dataset_name, self.subset, split="test", trust_remote_code=True)
+        # self.test_dataset = load_dataset(self.dataset_name, self.subset, split="test", trust_remote_code=True)
         self.prompt_style = self.train_prompt_style(dataset_format)
         self.tokenizer = tokenizer
     

@@ -1,5 +1,5 @@
 # TuneLLM
-This repo basically helps any individual to fientune their LLM with their custom dataset using various methods like LORA, QLORA, GRPO, DPO, etc and compare the accuracies and training and inference speeds
+This repo basically helps any individual to fientune their LLM with their custom dataset using various methods like LoRA, QLoRA, GRPO, DPO, etc and compare the accuracies and training and inference speeds
 
 ## Dataset Conversion
 
@@ -18,9 +18,10 @@ This project includes a flexible dataset converter (`dataset_converter.py`) that
 
 ## Qwen-4B Quantization Benchmark
 
-| Quantization | Precision | Training Time (Epoch 1) | Final Loss | Final Accuracy |
-|--------------|-----------|--------------------------|------------|----------------|
-| FP16         | Half      | 4h 59m                   | 1.1642       | 86.7%          |
-| BF16         | Brain     | 8h 20m                   | 1.88       | 87.0%          |
-| INT8         | 8-bit     | 6h 10m                   | 2.05       | 84.1%          |
-| INT4         | 4-bit     | 4h 45m                   | 2.35       | 81.3%          |
+| Quantization | Precision | Training Time (Epoch 1) | Final Loss | Final Accuracy | GPU Memory |
+|--------------|-----------|--------------------------|------------|----------------|------------|
+| FP16         | Half      | 4h 59m                   | 1.1642       | 86.7%          | 8.2 GB     |
+| BF16         | Brain     | 8h 20m                   | 1.88       | 87.0%          | 8.5 GB     |
+| INT8         | 8-bit     | 6h 10m                   | 2.05       | 84.1%          | 6.1 GB     |
+| INT8 [batch_size=2]         | 8-bit     | 1h 50m                   | 2.05       | 84.1%          | 39 GB     |
+| INT4         | 4-bit     | 4h 45m                   | 2.35       | 81.3%          | 3.9 GB     |

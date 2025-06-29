@@ -2,13 +2,14 @@ from typing import List, Dict, Any
 from datasets import load_dataset
 from transformers.models.auto.modeling_auto import AutoModelForCausalLM
 from transformers.models.auto.tokenization_auto import AutoTokenizer
+from transformers import BitsAndBytesConfig
 import torch
 import time
 
 class LLMModel:
     """Main LLM Model class for loading models, tokenizers, and datasets"""
     
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, quantization_config: BitsAndBytesConfig):
         """
         Initialize LLMModel with a specific model name
         
@@ -16,10 +17,12 @@ class LLMModel:
             model_name: HuggingFace model identifier (e.g., "Qwen/Qwen3-32B")
         """
         print(f"Initializing LLMModel with: {model_name}")
+        self.quantization_config = quantization_config
         self.model_name = model_name
         self.tokenizer = self.load_tokenizer()
         self.model = self.load_model()
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
         
         
@@ -29,7 +32,8 @@ class LLMModel:
         print(f"Loading tokenizer for {self.model_name}")
         tokenizer = AutoTokenizer.from_pretrained(
             self.model_name,
-            trust_remote_code=True
+            trust_remote_code=True,
+            use_fast=True
         )
         
         # Set pad token if not present
@@ -44,7 +48,8 @@ class LLMModel:
         model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
             trust_remote_code=True,
-            device_map="auto"
+            device_map="auto",
+            quantization_config=self.quantization_config
         )
         
         return model
