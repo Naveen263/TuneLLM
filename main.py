@@ -56,7 +56,7 @@ def train_model(model, tokenizer, dataset):
         save_steps=1000,
         warmup_steps=10,
         logging_strategy="steps",
-        learning_rate=2e-4,
+        learning_rate=1e-4,
         group_by_length=True,
         report_to="none"
     )
